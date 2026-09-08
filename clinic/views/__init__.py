@@ -1,3 +1,4 @@
+from clinic.views.webhooks import keycrm_webhook
 from clinic.views.pages import (
     booking,
     booking_doctors,
@@ -38,4 +39,5 @@ __all__ = [
     'booking_doctors',
     'handler404',
     'handler500',
+    'keycrm_webhook',
 ]

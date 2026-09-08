@@ -192,8 +192,8 @@ class WorkingHoursAdmin(ModelAdmin):
 
 
 class AppointmentAdmin(ModelAdmin):
-    list_display = ('name', 'phone', 'direction', 'contact_method', 'status', 'created_at')
+    list_display = ('name', 'phone', 'direction', 'contact_method', 'status', 'keycrm_card_id', 'created_at')
     list_filter = ('status', 'direction', 'contact_method', 'created_at')
     search_fields = ('name', 'phone', 'email')
-    readonly_fields = ('created_at', 'ip_address')
+    readonly_fields = ('created_at', 'ip_address', 'keycrm_card_id')
     autocomplete_fields = ('direction', 'service', 'doctor')

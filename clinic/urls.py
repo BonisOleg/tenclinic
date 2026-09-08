@@ -21,4 +21,5 @@ urlpatterns = [
     path('booking/services/', views.booking_services, name='booking_services'),
     path('booking/doctors/', views.booking_doctors, name='booking_doctors'),
     path('privacy/', views.privacy, name='privacy'),
+    path('webhooks/keycrm/<str:token>/', views.keycrm_webhook, name='keycrm_webhook'),
 ]

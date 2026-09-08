@@ -238,6 +238,12 @@ class Appointment(models.Model):
     status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='new')
     created_at = models.DateTimeField('Створено', auto_now_add=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    keycrm_card_id = models.PositiveIntegerField(
+        'KeyCRM картка',
+        null=True,
+        blank=True,
+        unique=True,
+    )
 
     class Meta:
         ordering = ['-created_at']

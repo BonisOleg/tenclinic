@@ -30,6 +30,13 @@ def normalize_ua_phone(phone: str) -> str:
     )
 
 
+def phone_e164(phone: str) -> str:
+    national = extract_national_digits(phone)
+    if UA_NATIONAL_PHONE_RE.match(national):
+        return f'+38{national}'
+    return (phone or '').strip()
+
+
 def phone_tel_uri(phone: str) -> str:
     national = extract_national_digits(phone)
     if UA_NATIONAL_PHONE_RE.match(national):
