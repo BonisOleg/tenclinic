@@ -9,6 +9,7 @@
 }
 
 .price-accordion {
+  scroll-margin-top: calc(5.5rem + env(safe-area-inset-top, 0px));
   margin-bottom: var(--space-md);
   background: var(--color-surface);
   border: 1px solid var(--color-border-subtle);

@@ -1,3 +1,10 @@
+<p class="services-price-link-row">
+  {% if price_section_slug %}
+  <a class="services-price-link" href="{% url 'clinic:price' %}#{{ price_section_slug }}">Прайс</a>
+  {% else %}
+  <a class="services-price-link" href="{% url 'clinic:price' %}">Прайс</a>
+  {% endif %}
+</p>
 {% regroup services by direction as direction_groups %}
 {% if direction_groups %}
 {% for group in direction_groups %}
@@ -46,5 +53,12 @@
 </section>
 {% endfor %}
 {% else %}
-<p class="services-catalog__empty">Послуг у цьому напрямку не знайдено.</p>
+<p class="services-catalog__empty">
+  {% if price_direction_slug %}
+  Окремих карток послуг у цьому напрямку немає.
+  <a href="{% url 'clinic:price' %}#{{ price_direction_slug }}">Ціни в прайсі</a>
+  {% else %}
+  Послуг у цьому напрямку не знайдено.
+  {% endif %}
+</p>
 {% endif %}

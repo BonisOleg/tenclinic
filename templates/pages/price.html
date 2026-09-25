@@ -5,15 +5,16 @@
 {% block page_class %}page--inner{% endblock %}
 
 {% block content %}
+{% include 'includes/breadcrumbs.html' %}
 <section class="section section--alt section--page-top price-page">
   <div class="container">
     <div class="inner-page-head reveal">
       <p class="section-eyebrow section-eyebrow--plain">Прайс</p>
-      <p class="price-page__updated">Ціни актуальні на {% now "d.m.Y" %}</p>
+      <p class="price-page__updated">Ціни актуальні на {{ price_updated_on|date:"d.m.Y" }}</p>
     </div>
 
     {% for direction in directions %}
-    <details class="price-accordion reveal">
+    <details class="price-accordion reveal" id="{{ direction.slug }}">
       <summary class="price-accordion__summary">{{ direction.name }}</summary>
       <div class="price-table" role="table" aria-label="Прайс — {{ direction.name }}">
         <div class="price-table__head" role="row">

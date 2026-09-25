@@ -1,21 +1,8 @@
 from django import forms
-from django.utils.text import slugify
 
-from clinic.models import PriceListItem
+from clinic.models import PriceListItem, PriceListSettings
 from clinic.price_items import PRICE_SLUG_PREFIX, price_item_slug
-
-
-def unique_price_slug(base):
-    from clinic.models import Service
-
-    slug = price_item_slug(base)
-    if not Service.objects.filter(slug=slug).exists():
-        return slug
-    for index in range(2, 100):
-        candidate = price_item_slug(f'{base}-{index}')
-        if not Service.objects.filter(slug=candidate).exists():
-            return candidate
-    raise ValueError('Не вдалося згенерувати унікальний slug.')
+from clinic.utils.slug import latin_slug, unique_slug
 
 
 class PriceListItemForm(forms.ModelForm):
@@ -37,10 +24,19 @@ class PriceListItemForm(forms.ModelForm):
         if not obj.short_description:
             obj.short_description = ''
         if not obj.slug:
-            base = slugify(obj.name, allow_unicode=True) or 'posytsiya'
-            obj.slug = unique_price_slug(base)
+            base = latin_slug(obj.name, 'posytsiya')
+            obj.slug = unique_slug(base, prefix=PRICE_SLUG_PREFIX)
         elif not obj.slug.startswith(PRICE_SLUG_PREFIX):
             obj.slug = price_item_slug(obj.slug.removeprefix(PRICE_SLUG_PREFIX))
         if commit:
             obj.save()
         return obj
+
+
+class PriceListDateForm(forms.ModelForm):
+    class Meta:
+        model = PriceListSettings
+        fields = ('updated_on',)
+        widgets = {
+            'updated_on': forms.DateInput(attrs={'type': 'date'}),
+        }

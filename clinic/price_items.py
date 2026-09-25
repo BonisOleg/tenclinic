@@ -47,18 +47,18 @@ def directions_with_price_items():
     ).distinct()
 
 
-def public_services_queryset(*, direction_slug=''):
-    from django.db.models import Q
+def direction_has_price_items(direction_slug):
+    if not direction_slug:
+        return False
+    return directions_with_price_items().filter(slug=direction_slug).exists()
 
+
+def public_services_queryset(*, direction_slug=''):
     from clinic.models import Service
 
-    priced_directions = directions_with_price_items()
     services = (
         Service.objects.filter(is_active=True)
-        .filter(
-            Q(slug__startswith=PRICE_SLUG_PREFIX)
-            | ~Q(direction__in=priced_directions),
-        )
+        .exclude(slug__startswith=PRICE_SLUG_PREFIX)
         .select_related('direction')
         .order_by('direction__order', 'direction__name', 'order', 'name')
     )

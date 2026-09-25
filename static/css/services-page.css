@@ -21,6 +21,21 @@
   backdrop-filter: blur(8px);
 }
 
+.services-price-link-row {
+  margin: 0 0 var(--space-md);
+}
+
+.services-price-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-navy);
+  text-underline-offset: 0.15em;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .services-page__note {
   margin: 0.625rem 0 0;
   max-width: 36rem;
@@ -157,6 +172,11 @@
   .services-catalog-item:hover .services-catalog-item__link {
     color: var(--color-navy);
   }
+
+  .services-catalog__empty a:hover,
+  .services-price-link:hover {
+    color: var(--color-navy-dark);
+  }
 }
 
 .services-catalog__empty {
@@ -165,6 +185,12 @@
   text-align: center;
   color: var(--color-graphite-muted);
   font-size: var(--font-size-sm);
+}
+
+.services-catalog__empty a {
+  color: var(--color-navy);
+  font-weight: 600;
+  text-underline-offset: 0.15em;
 }
 
 @media (min-width: 640px) {

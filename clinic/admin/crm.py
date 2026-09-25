@@ -1,10 +1,24 @@
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import path
 from unfold.admin import ModelAdmin
 
+from clinic.admin.catalog_service_form import CatalogServiceForm
 from clinic.admin.filters import HasPriceFilter
 from clinic.admin.hearing_aid_form import HearingAidAdminForm
 from clinic.admin.mixins import DoctorImagePreviewMixin, ImagePreviewMixin, OrderOnCreateMixin, ReadableUnfoldFieldsMixin
-from clinic.admin.price_list_form import PriceListItemForm
-from clinic.models import Appointment, CatalogService, Direction, Doctor, HearingAid, PriceListItem, Service, WorkingHours
+from clinic.admin.price_list_form import PriceListDateForm, PriceListItemForm
+from clinic.models import (
+    Appointment,
+    CatalogService,
+    Direction,
+    Doctor,
+    HearingAid,
+    PriceListItem,
+    PriceListSettings,
+    Service,
+    WorkingHours,
+)
 from clinic.price_items import PRICE_SLUG_PREFIX, catalog_services_filter
 
 
@@ -114,6 +128,7 @@ class ServiceAutocompleteAdmin(ModelAdmin):
 
 
 class CatalogServiceAdmin(OrderOnCreateMixin, ModelAdmin):
+    form = CatalogServiceForm
     ordering_field = 'order'
     hide_ordering_field = True
     list_display = ('name', 'direction', 'price', 'price_on_site', 'is_active')
@@ -129,9 +144,8 @@ class CatalogServiceAdmin(OrderOnCreateMixin, ModelAdmin):
         ('Ціна та тривалість', {
             'fields': ('price', 'price_note', 'duration_minutes'),
             'description': (
-                'Ціна показується на «Послуги та ціни» для напрямків без окремого прайсу '
-                '(наприклад, дитяча ЛОР, сурдологія). Для отоларингології, щелепно-лицевої '
-                'хірургії та анестезії редагуйте ціни в розділі «Прайс».'
+                'Ціна показується на картці в каталозі «Послуги та ціни». '
+                'Рядки таблиці цін редагуйте в розділі «Прайс».'
             ),
         }),
     )
@@ -155,19 +169,49 @@ class PriceListItemAdmin(OrderOnCreateMixin, ModelAdmin):
     search_fields = ('name',)
     autocomplete_fields = ('direction',)
     readonly_fields = ('slug',)
-    fieldsets = (
-        (None, {
-            'fields': ('name', 'direction', 'price', 'price_note', 'duration_minutes', 'is_active'),
-            'description': (
-                'Позиції прайсу відображаються на «Послуги та ціни» та /price/ '
-                'для обраного напрямку. Slug генерується автоматично.'
+    list_before_template = 'admin/clinic/price_date_bar.html'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                'date/',
+                self.admin_site.admin_view(self.price_date_view),
+                name='clinic_pricelistitem_date',
             ),
-        }),
-        ('Системне', {
-            'fields': ('slug',),
-            'classes': ('collapse',),
-        }),
-    )
+        ]
+        return custom + urls
+
+    def price_date_view(self, request):
+        form = PriceListDateForm(request.POST, instance=PriceListSettings.get_solo())
+        if form.is_valid():
+            form.save()
+            self.message_user(request, 'Дату прайсу збережено.')
+        else:
+            self.message_user(request, 'Вкажіть коректну дату прайсу.', level=messages.ERROR)
+        return redirect('admin:clinic_pricelistitem_changelist')
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['price_date_form'] = PriceListDateForm(instance=PriceListSettings.get_solo())
+        return super().changelist_view(request, extra_context=extra_context)
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = [
+            (None, {
+                'fields': ('name', 'direction', 'price', 'price_note', 'duration_minutes', 'is_active'),
+                'description': (
+                    'Позиція з’являється лише на сторінці /price/. '
+                    'Slug генерується автоматично і в каталог карток не потрапляє.'
+                ),
+            }),
+        ]
+        if obj is not None:
+            fieldsets.append((
+                'Системне',
+                {'fields': ('slug',), 'classes': ('collapse',)},
+            ))
+        return fieldsets
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(slug__startswith=PRICE_SLUG_PREFIX)

@@ -10,6 +10,11 @@
     <p class="card__meta">{{ service.direction.name }}</p>
     <h1>{{ service.name }}</h1>
     <p class="section__lead">{{ service.price_display }}{% if service.duration_minutes %} · {{ service.duration_minutes }} хв{% endif %}</p>
+    {% if show_direction_price %}
+    <p class="service-detail__price-row">
+      <a class="service-detail__price-link" href="{% url 'clinic:price' %}#{{ service.direction.slug }}">Прайс напрямку</a>
+    </p>
+    {% endif %}
     {{ service.description|linebreaks }}
 
     {% if doctors %}

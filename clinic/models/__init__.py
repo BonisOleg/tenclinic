@@ -5,6 +5,7 @@ from clinic.models.crm import (
     Doctor,
     HearingAid,
     PriceListItem,
+    PriceListSettings,
     Service,
     WorkingHours,
 )
@@ -19,6 +20,7 @@ __all__ = [
     'Service',
     'CatalogService',
     'PriceListItem',
+    'PriceListSettings',
     'WorkingHours',
     'Appointment',
 ]

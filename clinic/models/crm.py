@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from clinic.image_specs import DIRECTION_IMAGE, DOCTOR_PHOTO, HEARING_AID_IMAGE
 
@@ -157,6 +158,26 @@ class PriceListItem(Service):
         proxy = True
         verbose_name = 'Позиція прайсу'
         verbose_name_plural = 'Прайс'
+
+
+class PriceListSettings(models.Model):
+    updated_on = models.DateField('Ціни актуальні на', default=timezone.localdate)
+
+    class Meta:
+        verbose_name = 'Дата прайсу'
+        verbose_name_plural = 'Дата прайсу'
+
+    def __str__(self):
+        return self.updated_on.strftime('%d.%m.%Y')
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, _created = cls.objects.get_or_create(pk=1)
+        return obj
 
 
 class WorkingHours(models.Model):

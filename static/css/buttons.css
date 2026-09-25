@@ -320,55 +320,13 @@
   }
 }
 
-.site-footer__links a {
-  position: relative;
-  display: inline-block;
-  padding: 0.125rem 0;
-  transition:
-    color var(--duration-ui) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .site-footer__links a:hover {
-    color: var(--color-navy);
-    transform: translateX(3px);
-  }
-}
-
-.site-footer__phone {
-  transition:
-    color var(--duration-ui) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .site-footer__phone:hover {
-    color: var(--color-navy-dark);
-    transform: translateX(2px);
-  }
-}
-
-.site-footer__bottom-inner a {
-  position: relative;
-  transition: color var(--duration-ui) var(--ease-out);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .site-footer__bottom-inner a:hover {
-    color: var(--color-navy);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .btn--primary::before,
   .btn--cta::before,
   .btn--shine::before,
   .site-nav__link,
-  .mobile-nav__link,
-  .site-footer__links a,
-  .site-footer__phone {
+  .mobile-nav__link {
     transition: none;
   }
 
@@ -385,9 +343,7 @@
   .btn--sage:hover,
   .site-nav__link:hover,
   .site-nav__link:active,
-  .mobile-nav__link:hover,
-  .site-footer__links a:hover,
-  .site-footer__phone:hover {
+  .mobile-nav__link:hover {
     transform: none;
   }
 }

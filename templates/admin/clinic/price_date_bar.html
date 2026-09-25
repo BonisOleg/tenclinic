@@ -1,0 +1,12 @@
+<form method="post" action="{% url 'admin:clinic_pricelistitem_date' %}" class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-end">
+  {% csrf_token %}
+  <div class="min-w-0">
+    <label class="mb-1 block text-sm font-medium" for="{{ price_date_form.updated_on.id_for_label }}">
+      {{ price_date_form.updated_on.label }}
+    </label>
+    {{ price_date_form.updated_on }}
+  </div>
+  <button type="submit" class="bg-primary-600 font-medium px-3 py-2 rounded text-white">
+    Зберегти дату
+  </button>
+</form>

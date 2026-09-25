@@ -6,8 +6,13 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET, require_http_methods
 
 from clinic.forms import AppointmentForm, increment_rate_limit, is_rate_limited
-from clinic.models import Direction, Doctor, HearingAid, Service, WorkingHours
-from clinic.price_items import PRICE_SLUG_PREFIX, catalog_services_filter, public_services_queryset
+from clinic.models import Direction, Doctor, HearingAid, PriceListSettings, Service, WorkingHours
+from clinic.price_items import (
+    PRICE_SLUG_PREFIX,
+    catalog_services_filter,
+    direction_has_price_items,
+    public_services_queryset,
+)
 from clinic.utils.block_render import get_block_text
 
 
@@ -106,16 +111,27 @@ def doctor_detail(request, slug):
     })
 
 
+def _services_list_context(direction_slug):
+    services = public_services_queryset(direction_slug=direction_slug)
+    has_price = bool(direction_slug) and direction_has_price_items(direction_slug)
+    price_direction_slug = direction_slug if has_price and not services.exists() else ''
+    return {
+        'services': services,
+        'current_direction': direction_slug,
+        'price_direction_slug': price_direction_slug,
+        'price_section_slug': direction_slug if has_price else '',
+    }
+
+
 def services_list(request):
     direction_slug = request.GET.get('direction', '')
-    services = public_services_queryset(direction_slug=direction_slug)
-    directions = Direction.objects.filter(is_active=True).order_by('order', 'name')
+    context = _services_list_context(direction_slug)
     if request.htmx:
-        return render(request, 'partials/services_grid.html', {'services': services})
+        return render(request, 'partials/services_grid.html', context)
+    directions = Direction.objects.filter(is_active=True).order_by('order', 'name')
     return render(request, 'pages/services/list.html', {
-        'services': services,
+        **context,
         'directions': directions,
-        'current_direction': direction_slug,
     })
 
 
@@ -125,6 +141,7 @@ def service_detail(request, slug):
     return render(request, 'pages/services/detail.html', {
         'service': service,
         'doctors': doctors,
+        'show_direction_price': direction_has_price_items(service.direction.slug),
         'breadcrumbs': [
             {'title': 'Послуги та ціни', 'url': '/services/'},
             {'title': service.name},
@@ -148,7 +165,11 @@ def price_list(request):
     )
     return render(request, 'pages/price.html', {
         'directions': directions,
-        'breadcrumbs': [{'title': 'Прайс'}],
+        'price_updated_on': PriceListSettings.get_solo().updated_on,
+        'breadcrumbs': [
+            {'title': 'Послуги та ціни', 'url': '/services/'},
+            {'title': 'Прайс'},
+        ],
     })
 
 

@@ -123,12 +123,15 @@ main.page:not(.page--no-bottom-cta)+.site-footer {
 
 .site-footer__links a {
   display: inline-block;
+  max-width: 100%;
   font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1.35;
   color: var(--color-graphite);
   text-decoration: none;
-  transition: color var(--duration-ui) var(--ease-out);
+  transition:
+    color var(--duration-ui) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
 .site-footer__contact-list {
@@ -154,12 +157,16 @@ main.page:not(.page--no-bottom-cta)+.site-footer {
 }
 
 .site-footer__phone {
+  display: inline-block;
+  max-width: 100%;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--color-navy);
   text-decoration: none;
-  transition: color var(--duration-ui) var(--ease-out);
+  transition:
+    color var(--duration-ui) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
 .site-footer__bottom {
@@ -218,10 +225,12 @@ main.page:not(.page--no-bottom-cta)+.site-footer {
 @media (hover: hover) and (pointer: fine) {
   .site-footer__links a:hover {
     color: var(--color-navy);
+    transform: translateX(3px);
   }
 
   .site-footer__phone:hover {
     color: var(--color-navy-dark);
+    transform: translateX(2px);
   }
 
   .site-footer__legal:hover,
@@ -282,6 +291,11 @@ main.page:not(.page--no-bottom-cta)+.site-footer {
   .site-footer__legal,
   .site-footer a.site-footer__credit-link {
     transition: none;
+  }
+
+  .site-footer__links a:hover,
+  .site-footer__phone:hover {
+    transform: none;
   }
 }
 
