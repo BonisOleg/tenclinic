@@ -165,7 +165,7 @@ def price_list(request):
     )
     return render(request, 'pages/price.html', {
         'directions': directions,
-        'price_updated_on': PriceListSettings.get_solo().updated_on,
+        'price_updated_on': PriceListSettings.get_solo().display_date,
         'breadcrumbs': [
             {'title': 'Послуги та ціни', 'url': '/services/'},
             {'title': 'Прайс'},

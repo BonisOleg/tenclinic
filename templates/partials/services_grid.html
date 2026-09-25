@@ -14,7 +14,6 @@
     <span class="services-catalog-head__service">Послуга</span>
     <span class="services-catalog-head__duration">Тривалість</span>
     <span class="services-catalog-head__price">Ціна</span>
-    <span class="services-catalog-head__action"></span>
   </div>
   <ul class="services-catalog-list">
     {% for service in group.list %}
@@ -41,11 +40,6 @@
       </div>
       <div class="services-catalog-item__price services-catalog-item__price--col">
         {{ service.price_display }}
-      </div>
-      <div class="services-catalog-item__action">
-        {% if not service.is_price_item %}
-        <a href="{% url 'clinic:service_detail' service.slug %}" class="services-catalog-item__link">Детальніше →</a>
-        {% endif %}
       </div>
     </li>
     {% endfor %}

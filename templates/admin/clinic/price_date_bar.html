@@ -1,12 +1,136 @@
-<form method="post" action="{% url 'admin:clinic_pricelistitem_date' %}" class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-end">
+<form method="post" action="{% url 'admin:clinic_pricelistitem_date' %}" class="price-date-bar">
   {% csrf_token %}
-  <div class="min-w-0">
-    <label class="mb-1 block text-sm font-medium" for="{{ price_date_form.updated_on.id_for_label }}">
-      {{ price_date_form.updated_on.label }}
-    </label>
-    {{ price_date_form.updated_on }}
-  </div>
-  <button type="submit" class="bg-primary-600 font-medium px-3 py-2 rounded text-white">
-    Зберегти дату
-  </button>
+  <label class="price-date-bar__label" for="{{ price_date_form.date_mode.id_for_label }}">
+    {{ price_date_form.date_mode.label }}
+  </label>
+  <label class="price-date-bar__label" for="{{ price_date_form.updated_on.id_for_label }}">
+    {{ price_date_form.updated_on.label }}
+  </label>
+  <span class="price-date-bar__label" aria-hidden="true"></span>
+  {{ price_date_form.date_mode }}
+  {{ price_date_form.updated_on }}
+  <button type="submit" class="price-date-bar__submit">Зберегти дату</button>
 </form>
+<style>
+  .price-date-bar {
+    display: grid;
+    grid-template-columns: max-content max-content max-content;
+    column-gap: 0.75rem;
+    row-gap: 0.35rem;
+    align-items: center;
+    justify-content: start;
+    margin-bottom: 1rem;
+  }
+
+  .price-date-bar__label {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+  }
+
+  .price-date-bar__mode,
+  .price-date-bar input[type="date"],
+  .price-date-bar button.price-date-bar__submit {
+    box-sizing: border-box;
+    height: 2.75rem;
+    min-height: 2.75rem;
+    margin: 0;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    line-height: 1.25rem;
+  }
+
+  .price-date-bar input[type="date"] {
+    color-scheme: light;
+    min-width: 13.5rem;
+    padding: 0 2.75rem 0 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1.5rem 1.5rem;
+  }
+
+  .dark .price-date-bar input[type="date"] {
+    color-scheme: dark;
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #f8fafc;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='%23f8fafc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");
+  }
+
+  .price-date-bar input[type="date"]::-webkit-calendar-picker-indicator {
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
+  }
+
+  .price-date-bar__mode {
+    min-width: 12.5rem;
+    padding: 0 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: transparent;
+    color: inherit;
+  }
+
+  .dark .price-date-bar__mode {
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #f8fafc;
+    background: transparent;
+  }
+
+  .price-date-bar button.price-date-bar__submit {
+    padding: 0 1rem;
+    border: 1px solid transparent;
+    background: #7c3aed;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .price-date-bar {
+      grid-template-columns: 1fr;
+    }
+
+    .price-date-bar__label[aria-hidden="true"] {
+      display: none;
+    }
+  }
+</style>
+<script>
+  (function () {
+    const mode = document.getElementById('id_date_mode');
+    const date = document.getElementById('id_updated_on');
+    if (!mode || !date) {
+      return;
+    }
+    const fixedDate = date.dataset.fixedDate || '';
+
+    const todayIso = () => {
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return now.getFullYear() + '-' + month + '-' + day;
+    };
+
+    const syncDate = () => {
+      if (mode.value === 'today') {
+        date.value = todayIso();
+        return;
+      }
+      if (fixedDate) {
+        date.value = fixedDate;
+      }
+    };
+
+    mode.addEventListener('change', syncDate);
+    syncDate();
+  })();
+</script>

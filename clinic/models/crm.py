@@ -161,6 +161,7 @@ class PriceListItem(Service):
 
 
 class PriceListSettings(models.Model):
+    use_today = models.BooleanField('Показувати сьогоднішню дату', default=False)
     updated_on = models.DateField('Ціни актуальні на', default=timezone.localdate)
 
     class Meta:
@@ -168,7 +169,13 @@ class PriceListSettings(models.Model):
         verbose_name_plural = 'Дата прайсу'
 
     def __str__(self):
-        return self.updated_on.strftime('%d.%m.%Y')
+        return self.display_date.strftime('%d.%m.%Y')
+
+    @property
+    def display_date(self):
+        if self.use_today:
+            return timezone.localdate()
+        return self.updated_on
 
     def save(self, *args, **kwargs):
         self.pk = 1

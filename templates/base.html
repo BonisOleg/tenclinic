@@ -7,7 +7,7 @@
   <title>{% block title %}{{ site_settings.site_name|default:'TEN clinic' }}{% if site_settings.tagline %} — {{ site_settings.tagline }}{% else %} — Medicine & Surgery{% endif %}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ site_settings.meta_description|default:'TEN clinic — новий стандарт медичної допомоги. Medicine & Surgery.' }}{% endblock %}">
   <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/svg+xml">
-  {% with cssv='20260925c' %}
+  {% with cssv='20260925f' %}
   <link rel="stylesheet" href="{% static 'css/variables.css' %}?v={{ cssv }}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ cssv }}">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}?v={{ cssv }}">

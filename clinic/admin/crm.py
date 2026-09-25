@@ -131,8 +131,8 @@ class CatalogServiceAdmin(OrderOnCreateMixin, ModelAdmin):
     form = CatalogServiceForm
     ordering_field = 'order'
     hide_ordering_field = True
-    list_display = ('name', 'direction', 'price', 'price_on_site', 'is_active')
-    list_editable = ('price', 'is_active')
+    list_display = ('name', 'direction', 'price', 'price_note', 'price_on_site', 'is_active')
+    list_editable = ('price', 'price_note', 'is_active')
     list_filter = ('direction', 'is_active', HasPriceFilter)
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)

@@ -5,6 +5,7 @@
 {% block page_class %}page--inner{% endblock %}
 
 {% block content %}
+{% include 'includes/breadcrumbs.html' %}
 <section class="section section--page-top">
   <div class="container reveal">
     <p class="card__meta">{{ service.direction.name }}</p>
