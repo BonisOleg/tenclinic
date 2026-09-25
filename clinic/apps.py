@@ -38,6 +38,7 @@ class ClinicConfig(AppConfig):
                     {'title': 'Напрямки', 'icon': 'medical_services', 'link': reverse_lazy('admin:clinic_direction_changelist')},
                     {'title': 'Лікарі', 'icon': 'person', 'link': reverse_lazy('admin:clinic_doctor_changelist')},
                     {'title': 'Послуги', 'icon': 'healing', 'link': reverse_lazy('admin:clinic_service_changelist')},
+                    {'title': 'Прайс', 'icon': 'payments', 'link': reverse_lazy('admin:clinic_pricelistitem_changelist')},
                     {'title': 'Слухові апарати', 'icon': 'hearing', 'link': reverse_lazy('admin:clinic_hearingaid_changelist')},
                 ],
             },
