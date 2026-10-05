@@ -33,14 +33,21 @@ curl -I http://127.0.0.1/admin/
 
 ## SSL (Let's Encrypt)
 
-```bash
-apt install -y certbot
-docker compose stop nginx
-certbot certonly --standalone -d tenclinic.com.ua -d www.tenclinic.com.ua
-# У .env: USE_HTTPS=true, CSRF_TRUSTED_ORIGINS=https://...
+Перший випуск або аварійний перевипуск (сайт ~1–2 хв на HTTP недоступний):
 
+```bash
+bash deploy/ssl/renew-now.sh
+# У .env: USE_HTTPS=true, CSRF_TRUSTED_ORIGINS=https://tenclinic.com.ua,https://www.tenclinic.com.ua
 USE_HTTPS=true bash deploy/docker/deploy.sh
 ```
+
+Автопродовження без зупинки nginx (webroot + `certbot.timer`):
+
+```bash
+bash deploy/ssl/setup-renewal.sh
+```
+
+Let's Encrypt оновлює сертифікат за ~30 днів до кінця терміну. Після успіху hook перезавантажує nginx.
 
 ## Оновлення
 
