@@ -1,4 +1,5 @@
-from unittest.mock import patch
+import json
+from unittest.mock import MagicMock, patch
 from urllib.error import URLError
 
 from django.core.exceptions import ValidationError
@@ -222,3 +223,111 @@ class KeyCrmWebhookTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.appointment.refresh_from_db()
         self.assertEqual(self.appointment.status, 'new')
+
+
+class ImmediateThread:
+    """Run the target synchronously so tests do not depend on real threads."""
+
+    def __init__(self, target=None, args=(), kwargs=None, daemon=None, name=None):
+        self._target = target
+        self._args = args
+        self._kwargs = kwargs or {}
+
+    def start(self):
+        if self._target:
+            self._target(*self._args, **self._kwargs)
+
+
+class TelegramNotificationTests(TestCase):
+    def setUp(self):
+        self.direction = Direction.objects.create(name='Отоларингологія', slug='orl-test')
+        self.appointment = Appointment.objects.create(
+            name='Тест <b>XSS</b> & Co',
+            phone='+380501112233',
+            email='user@example.com',
+            direction=self.direction,
+            comment='примітка <script>',
+            contact_method='telegram',
+        )
+
+    def _notify(self):
+        from clinic.services.notifications import notify_new_appointment
+        with self.captureOnCommitCallbacks(execute=True):
+            notify_new_appointment(self.appointment)
+
+    @override_settings(TELEGRAM_BOT_TOKEN='', TELEGRAM_CHAT_ID='')
+    @patch('clinic.services.notifications.Thread', ImmediateThread)
+    @patch('clinic.services.notifications.urlopen')
+    @patch('clinic.services.notifications.send_mail')
+    def test_missing_env_is_noop(self, _send_mail, urlopen_mock):
+        self._notify()
+        urlopen_mock.assert_not_called()
+
+    @override_settings(TELEGRAM_BOT_TOKEN='test-token', TELEGRAM_CHAT_ID='')
+    @patch('clinic.services.notifications.Thread', ImmediateThread)
+    @patch('clinic.services.notifications.urlopen')
+    @patch('clinic.services.notifications.send_mail')
+    def test_missing_chat_id_is_noop(self, _send_mail, urlopen_mock):
+        self._notify()
+        urlopen_mock.assert_not_called()
+
+    @override_settings(TELEGRAM_BOT_TOKEN='test-token', TELEGRAM_CHAT_ID='123456')
+    @patch('clinic.services.notifications.Thread', ImmediateThread)
+    @patch('clinic.services.notifications.urlopen')
+    @patch('clinic.services.notifications.send_mail')
+    def test_sends_escaped_html_and_parse_mode(self, _send_mail, urlopen_mock):
+        response = MagicMock()
+        response.status = 200
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+        urlopen_mock.return_value = response
+
+        self._notify()
+
+        urlopen_mock.assert_called_once()
+        request = urlopen_mock.call_args.args[0]
+        timeout = urlopen_mock.call_args.kwargs.get('timeout') or (
+            urlopen_mock.call_args.args[1] if len(urlopen_mock.call_args.args) > 1 else None
+        )
+        self.assertEqual(timeout, 5)
+        payload = json.loads(request.data.decode())
+        self.assertEqual(payload['chat_id'], '123456')
+        self.assertEqual(payload['parse_mode'], 'HTML')
+        self.assertIn('<b>Нова заявка</b>', payload['text'])
+        self.assertIn('&lt;b&gt;XSS&lt;/b&gt;', payload['text'])
+        self.assertIn('&amp; Co', payload['text'])
+        self.assertIn('&lt;script&gt;', payload['text'])
+        self.assertNotIn('<b>XSS</b>', payload['text'])
+        self.assertNotIn('<script>', payload['text'])
+        self.assertIn('Отоларингологія', payload['text'])
+        self.assertIn('/sendMessage', request.full_url)
+        self.assertTrue(request.full_url.startswith('https://api.telegram.org/bot'))
+
+    @override_settings(TELEGRAM_BOT_TOKEN='test-token', TELEGRAM_CHAT_ID='123456')
+    @patch('clinic.services.notifications.Thread', ImmediateThread)
+    @patch('clinic.services.notifications.urlopen', side_effect=URLError('down'))
+    @patch('clinic.services.notifications.send_mail')
+    def test_network_error_is_logged_and_not_raised(self, _send_mail, _urlopen):
+        from clinic.services.notifications import notify_new_appointment
+        with self.assertLogs('clinic.services.notifications', level='WARNING') as logs:
+            with self.captureOnCommitCallbacks(execute=True):
+                notify_new_appointment(self.appointment)
+        self.assertTrue(any('Telegram lead notification failed' in line for line in logs.output))
+
+    @override_settings(TELEGRAM_BOT_TOKEN='test-token', TELEGRAM_CHAT_ID='123456')
+    @patch('clinic.services.notifications.Thread', ImmediateThread)
+    @patch('clinic.services.notifications.urlopen')
+    @patch('clinic.services.notifications.send_mail')
+    def test_http_error_is_logged_and_not_raised(self, _send_mail, urlopen_mock):
+        from urllib.error import HTTPError
+        from io import BytesIO
+        urlopen_mock.side_effect = HTTPError(
+            'https://api.telegram.org/bot/sendMessage',
+            400,
+            'Bad Request',
+            hdrs=None,
+            fp=BytesIO(),
+        )
+        with self.assertLogs('clinic.services.notifications', level='WARNING') as logs:
+            self._notify()
+        self.assertTrue(any('rejected' in line and 'status=400' in line for line in logs.output))
